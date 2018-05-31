@@ -29,10 +29,14 @@
 #include "userprog/syscall.h"
 #include "userprog/tss.h"
 #else
-/* project #1 problem #1*/
+/* project #1 problem #1 */
 #include "projects/msgpassing/msgpassingtest.h"
-/* project #1 problem #2*/
+/* project #1 problem #2 */
 #include "projects/crossroads/crossroads.h"
+/* project #2 problem #1 */
+#include "projects/scheduling/schedulingtest.h"
+/* project #2 problem #2 */
+#include "projects/memalloc/memalloctest.h"
 #endif
 #ifdef FILESYS
 #include "devices/block.h"
@@ -95,6 +99,7 @@ int main (void)
 	/* Greet user. */
 	printf ("Pintos booting with %'"PRIu32" kB RAM...\n",
 	        init_ram_pages * PGSIZE / 1024);
+	printf ("Using page allocator %d\n", pallocator);
 
 	/* Initialize memory system. */
 	palloc_init (user_page_limit);
@@ -135,8 +140,10 @@ int main (void)
 	run_actions (argv);
 
 	/* Finish up. */
+	printf ("Shutting down ...\n");
 	shutdown ();
 	thread_exit ();
+	printf ("Bye.\n");
 }
 
 /* Clear the "BSS", a segment that should be initialized to
@@ -249,8 +256,8 @@ static char **parse_options (char **argv)
 #endif
 		else if (!strcmp (name, "-rs"))
 			random_init (atoi (value));
-		else if (!strcmp (name, "-mlfqs"))
-			thread_mlfqs = true;
+		else if (!strcmp (name, "-ma"))
+			pallocator = (enum palloc_allocator) atoi (value);
 #ifdef USERPROG
 		else if (!strcmp (name, "-ul"))
 			user_page_limit = atoi (value);
@@ -304,6 +311,8 @@ run_actions (char **argv)
 		{"run", 2, run_task},
 		{"messagepassing", 1, run_message_passing_test},
 		{"crossroads", 2, run_crossroads},
+		{"scheduling", 1, run_scheduling_test},
+		{"memalloc", 1, run_memalloc_test},
 #ifdef FILESYS
 		{"ls", 1, fsutil_ls},
 		{"cat", 2, fsutil_cat},
@@ -372,7 +381,7 @@ usage (void)
 #endif
 #endif
 	        "  -rs=SEED           Set random number seed to SEED.\n"
-	        "  -mlfqs             Use multi-level feedback queue scheduler.\n"
+	        "  -ma=NUM            Use specified memory allocator FF:0 NF:1\n"
 #ifdef USERPROG
 	        "  -ul=COUNT          Limit user memory to COUNT pages.\n"
 #endif

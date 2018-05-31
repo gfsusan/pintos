@@ -6,9 +6,11 @@ all: kernel.bin loader.bin
 
 include ../../Make.config
 include ../Make.vars
+
 ###### COMMENTED FOR CAU15841 PROJECTS
 # include ../../tests/Make.tests
 ###### COMMENTED FOR CAU15841 PROJECTS
+
 include ../../projects/Make.projects
 
 # Compiler and assembler options.

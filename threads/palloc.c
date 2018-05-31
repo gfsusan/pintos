@@ -40,6 +40,9 @@ static void init_pool (struct pool *, void *base, size_t page_cnt,
                        const char *name);
 static bool page_from_pool (const struct pool *, void *page);
 
+/* The page allocation algorithm */
+enum palloc_allocator pallocator = 0;
+
 /* Initializes the page allocator.  At most USER_PAGE_LIMIT
    pages are put into the user pool. */
 void
@@ -49,7 +52,8 @@ palloc_init (size_t user_page_limit)
   uint8_t *free_start = ptov (1024 * 1024);
   uint8_t *free_end = ptov (init_ram_pages * PGSIZE);
   size_t free_pages = (free_end - free_start) / PGSIZE;
-  size_t user_pages = free_pages / 2;
+  /* size_t user_pages = free_pages / 2; */
+  size_t user_pages = free_pages - 513;
   size_t kernel_pages;
   if (user_pages > user_page_limit)
     user_pages = user_page_limit;
@@ -146,6 +150,17 @@ void
 palloc_free_page (void *page) 
 {
   palloc_free_multiple (page, 1);
+}
+
+/* Obtains a status of the page pool */
+void
+palloc_get_status (enum palloc_flags flags)
+{
+  struct pool *pool = flags & PAL_USER ? &user_pool : &kernel_pool;
+
+  lock_acquire (&pool->lock);
+  bitmap_dump2 (pool->used_map);
+  lock_release (&pool->lock);
 }
 
 /* Initializes pool P as starting at START and ending at END,

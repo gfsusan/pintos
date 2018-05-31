@@ -21,8 +21,8 @@ typedef int tid_t;
 
 /* Thread priorities. */
 #define PRI_MIN 0                       /* Lowest priority. */
-#define PRI_DEFAULT 31                  /* Default priority. */
-#define PRI_MAX 63                      /* Highest priority. */
+#define PRI_DEFAULT 2                   /* Default priority. */
+#define PRI_MAX 4                       /* Highest priority. */
 
 /* A kernel thread or user process.
 
@@ -104,11 +104,6 @@ struct thread
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
   };
-
-/* If false (default), use round-robin scheduler.
-   If true, use multi-level feedback queue scheduler.
-   Controlled by kernel command-line option "-o mlfqs". */
-extern bool thread_mlfqs;
 
 void thread_init (void);
 void thread_start (void);
