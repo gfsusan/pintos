@@ -23,6 +23,12 @@
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 static struct list ready_list;
+static struct list ready_list_fq0;
+static struct list ready_list_fq1;
+static struct list ready_list_fq2;
+static struct list ready_list_fq3;
+static struct list ready_list_fq4;
+
 
 /* List of all processes.  Processes are added to this list
    when they are first scheduled and removed when they exit. */
@@ -70,6 +76,23 @@ static void schedule (void);
 void thread_schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
 
+
+/* added by jy for MFQ 
+	thread 의 priority 를 입력받아서
+	해당 우선순위의 쓰레드 리스트를 반환
+*/
+struct list thread_get_fq(int p)
+{
+	switch (p) {
+	case 0: return ready_list_fq0;
+	case 1: return ready_list_fq1;
+	case 2: return ready_list_fq2;
+	case 3: return ready_list_fq3;
+	case 4: return ready_list_fq4;
+	}
+}
+////////////////////////////////
+
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
    general and it is possible in this case only because loader.S
@@ -90,6 +113,14 @@ thread_init (void)
 
   lock_init (&tid_lock);
   list_init (&ready_list);
+  /* added by jy for MFQ */
+  list_init(&ready_list_fq0);
+  list_init(&ready_list_fq1);
+  list_init(&ready_list_fq2);
+  list_init(&ready_list_fq3);
+  list_init(&ready_list_fq4);
+  /////////////////////////
+
   list_init (&all_list);
   list_init (&sleep_list);
 
@@ -237,6 +268,12 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
+
+  /* added by jy for MFQ
+  ready_list 변수에 우선순위별로 ready_list를 할당 */
+  ready_list = thread_get_fq(t->priority);
+  ////////////////////////
+
   list_push_back (&ready_list, &t->elem);
   t->status = THREAD_READY;
   intr_set_level (old_level);
@@ -364,8 +401,15 @@ thread_yield (void)
   ASSERT (!intr_context ());
 
   old_level = intr_disable ();
-  if (cur != idle_thread) 
-    list_push_back (&ready_list, &cur->elem);
+  if (cur != idle_thread)
+  {
+	  /* added by jy for MFQ
+	  ready_list 변수에 우선순위별로 ready_list를 할당 */
+	  ready_list = thread_get_fq(cur->priority);
+	  ////////////////////////
+
+	  list_push_back(&ready_list, &cur->elem);
+  }
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -610,6 +654,13 @@ static void
 schedule (void) 
 {
   struct thread *cur = running_thread ();
+ 
+  /* added by jy for MFQ 
+  next_thread_to_run 이 결국 다음에 실행될 쓰레드를 가져오는 함수이다.
+  이 함수에서 기존의 Round Robin 기법으로 다음 실행될 쓰레드를 가져오고 있다.
+  MFQ 를 위해서 5개의 queue list 가 사용되기 때문에 이부분에서도 priority 에 따라
+  쓰레드를 어떻게 가져올지에 관한 로직이 필요하다.
+  */
   struct thread *next = next_thread_to_run ();
   struct thread *prev = NULL;
 
