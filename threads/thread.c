@@ -591,10 +591,47 @@ alloc_frame (struct thread *t, size_t size)
 static struct thread *
 next_thread_to_run (void) 
 {
-  if (list_empty (&ready_list))
-    return idle_thread;
+  if (list_empty(&ready_list_fq4))
+  {
+	  if (list_empty(&ready_list_fq3))
+	  {
+		  if (list_empty(&ready_list_fq2))
+		  {
+			  if (list_empty(&ready_list_fq1))
+			  {
+				  if (list_empty(&ready_list_fq0))
+				  {
+					  return idle_thread;
+				  }
+				  else
+				  {
+					  ready_list = ready_list_fq0;
+					  return list_entry(list_pop_front(&ready_list), struct thread, elem);
+				  }
+			  }
+			  else
+			  {
+				  ready_list = ready_list_fq1;
+				  return list_entry(list_pop_front(&ready_list), struct thread, elem);
+			  }
+		  }
+		  else
+		  {
+			  ready_list = ready_list_fq2;
+			  return list_entry(list_pop_front(&ready_list), struct thread, elem);
+		  }
+	  }
+	  else
+	  {
+		  ready_list = ready_list_fq3;
+		  return list_entry(list_pop_front(&ready_list), struct thread, elem);
+	  }
+  }
   else
-    return list_entry (list_pop_front (&ready_list), struct thread, elem);
+  {
+	  ready_list = ready_list_fq4;
+	  return list_entry(list_pop_front(&ready_list), struct thread, elem);
+  }
 }
 
 /* Completes a thread switch by activating the new thread's page
