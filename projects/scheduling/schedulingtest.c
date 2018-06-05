@@ -6,6 +6,9 @@
 #include "devices/timer.h"
 #include "projects/scheduling/schedulingtest.h"
 
+// 추가됨
+#include "lib/random.h"
+
 
 #define MAX_THREAD_CNT 10
 
@@ -43,8 +46,11 @@ void run_scheduling_test(char **argv UNUSED)
 	int i;
 	struct thread_info info[MAX_THREAD_CNT];
 	int64_t start_time;
+	int priority;
 
+	random_init(0);	// 추가 - seed값
 	start_time = timer_ticks();
+	printf("11111222222\n");
 	for (i=0; i<MAX_THREAD_CNT; i++) {
 		struct thread_info *ti = &info[i];
 		char name[16];
@@ -54,8 +60,11 @@ void run_scheduling_test(char **argv UNUSED)
 		ti->tick_count = 0;
 		sema_init(&ti->sema_join, 0);
 
+		priority = ((int) random_ulong() & 0x00FF) % 5;		// random으로 priority 생성
+		
+		printf("%d's priority : %d\n", i, priority);
 		snprintf(name, sizeof name, "load %d", i);
-		thread_create(name, PRI_DEFAULT, load_thread, ti);
+		thread_create(name, priority, load_thread, ti);
 	}
 
 	printf("Starting threads took %lld ticks.\n", timer_elapsed (start_time));

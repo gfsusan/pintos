@@ -159,7 +159,7 @@ thread_tick(void)
 	int current_priority = thread_get_priority();
 	struct list *lower_list;
 	struct thread *lower_cur_t;
-	struct list_elem *cur_elem;
+	struct list_elem *next_elem;
 	/* Update statistics. */
 	if (t == idle_thread)
 		idle_ticks++;
@@ -176,18 +176,14 @@ thread_tick(void)
 		lower_list = thread_get_fq(i);
 
 		if (!list_empty(lower_list)) {
-			// 현재 테스트 코드는 이 안을 들어오지 않음..!! --> 수정..?
-			printf("priority : %d\n", current_priority);
 
-			cur_elem = list_begin(lower_list);
-			lower_cur_t = list_entry(cur_elem, struct thread, elem);   // 사용하는 방법
+			next_elem = list_begin(lower_list);								// 현재 fq의 첫 list_elem * 반환
 
-			while (&(lower_cur_t->elem) != list_end(lower_list)) {
-				//cur_elem = addAge(lower_cur_t);						//  Age에 대한 기능 다 하고, next_elem 반환
-				//lower_cur_t = list_entry(cur_elem, struct thread, elem);   // 사용하는 방법
-			}
-			cur_elem = addAge(lower_cur_t);
-
+			do {
+				lower_cur_t = list_entry(next_elem, struct thread, elem);   // next_elem을 갖는 struct thread 반환
+				next_elem = addAge(lower_cur_t);							// 현재 thread의 Age에 대한 기능 다 하고, next_elem 반환
+			} while (next_elem != list_end(lower_list));					// 현재 thread의 elem이 fq의 마지막이 아니면, next가 존재
+			
 		}
 	}
 
@@ -208,16 +204,17 @@ struct list_elem * addAge(struct thread* cur_t) {
 	struct list *nextfq;
 
 	cur_t->age++;
-
+	printf("Thread %d's age : %d\n", cur_t->tid, cur_t->age);
+	
 	if (cur_t->age >= 20) {
+		printf("Thread %d's priority has been changed to %d\n", cur_t->tid, cur_t->priority);
 		cur_t->priority++;
 		cur_t->age = 0;
 
 		// 기존 readyqueue에서 지우고 readyqueue 하나 올리기
-		nextfq = thread_get_fq(cur_t->priority);
-		next_elem = list_remove(&cur_t->elem);
-		list_push_back(nextfq, &cur_t->elem);
-
+		nextfq = thread_get_fq(cur_t->priority);		// 증가된 priority의 fq 반환
+		next_elem = list_remove(&cur_t->elem);			// 현재 thread 기존 fq에서 제거 후 next_elem 반환
+		list_push_back(nextfq, &cur_t->elem);			// 현재 thread 새로운 fq에 push back
 	}
 	else
 		next_elem = list_next(&cur_t->elem);
