@@ -48,7 +48,7 @@ void run_scheduling_test(char **argv UNUSED)
 	int64_t start_time;
 	int priority;
 
-	random_init(0);	// 추가 - seed값
+	random_init(0);	// added - seed
 	start_time = timer_ticks();
 	printf("11111222222\n");
 	for (i=0; i<MAX_THREAD_CNT; i++) {
@@ -60,7 +60,7 @@ void run_scheduling_test(char **argv UNUSED)
 		ti->tick_count = 0;
 		sema_init(&ti->sema_join, 0);
 
-		priority = ((int) random_ulong() & 0x00FF) % 5;		// random으로 priority 생성
+		priority = ((int) random_ulong() & 0x00FF) % 5;		// set priority by random
 		
 		printf("%d's priority : %d\n", i, priority);
 		snprintf(name, sizeof name, "load %d", i);

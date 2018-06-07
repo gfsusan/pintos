@@ -21,6 +21,7 @@ typedef unsigned long elem_type;
 
 /* Store the last scanned index for Next-fit */
 size_t next = 0;
+const size_t maxSize = 1 << 9;
 
 /* Number of bits in an element. */
 #define ELEM_BITS (sizeof (elem_type) * CHAR_BIT)
@@ -301,7 +302,7 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 {
   ASSERT (b != NULL);
   ASSERT (start <= b->bit_cnt);
-  // value는 항상 false여야 함
+  // value should be always false
   ASSERT(value == false);
 
   if (cnt <= b->bit_cnt) 
@@ -338,35 +339,33 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 		  size_t tempSize;
 		  size_t tempIndex;
 
-		  for (i = start; i <= last; i++) {								// bitmap의 전체 크기를 돌면서
-			  if (!bitmap_test(b, i)) {									// i번째가 비었으면
-				  tempIndex = i;										// tempIndex를 i로 설정
+		  for (i = start; i <= last; i++) {								// Iterate bitmap from start to last
+			  if (!bitmap_test(b, i)) {									// If ith bit is empty
+				  tempIndex = i;
 
-				  for (j = tempIndex + 1; j <= b->bit_cnt - 1; j++) {	// tempIndex + 1부터 전체를 돌면서, 범위 설정..?!?!?
-					  if (bitmap_test(b, j))							// j번째가 비어있지 않으면
-						  break;										// j-1번째까지 비어있음
+				  for (j = tempIndex + 1; j <= b->bit_cnt - 1; j++) {	// Iterate bitmap from tempIndex + 1 to bit_cnt  -1
+					  if (bitmap_test(b, j))							// If jth bit is not empty
+						  break;										// From tempIndex to j-1 is empty
 				  }
-				  tempSize = j - tempIndex;								// 비어있는 가장 큰 size 반환
-				  // tempSize = bitmap_count(b, tempIndex, j - tempIndex, value);		//  value == false 여야함
+				  tempSize = j - tempIndex;								// Get largest empty size
+				  // tempSize = bitmap_count(b, tempIndex, j - 1 - tempIndex, value);
 
-				  if (tempSize >= cnt) {								// 원하는 크기보다 빈 공간의 크기가 크면
-					  if (bestSize == 0 || bestSize > tempSize) {		// bestSize가 0 또는 tempSize보다 크면
-						  bestSize = tempSize;							// temp를 best로 저장
+				  if (tempSize >= cnt) {								
+					  if (bestSize == 0 || bestSize > tempSize) {		
+						  bestSize = tempSize;							// Set best as temp
 						  bestIndex = tempIndex;
 					  }
 				  }
 			  }
 		  }
-		  if (bestSize != 0) {											// 공간이 존재하면
+		  if (bestSize != 0) {											// If there is appropriate empty space
 			  printf("location of best index : %d, size : %d\n", bestIndex, bestSize);
 			  return bestIndex;
 		  }
       }
       else if (pallocator == 3) {	// Buddy System
-
+		  
       }
-
-
     }
   return BITMAP_ERROR;
 }
