@@ -311,19 +311,23 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 
       if (pallocator == 0) {		// First Fit
         for (i = start; i <= last; i++)
-          if (!bitmap_contains(b, i, cnt, !value))
-            return i;
+			if (!bitmap_contains(b, i, cnt, !value)) {
+				printf("location of index : %d, size : %d\n", i, cnt);
+				return i;
+			}
       }
       else if (pallocator == 1) {	// Next Fit
         for (i = next; i <= last; i++) {
 	  if (!bitmap_contains(b, i, cnt, !value)) {
 	    next = i;
+		printf("location of index : %d, size : %d\n", i, cnt);
 	    return i;
 	  }
 	}
 	for (i = start; i < next; i++) {
 	  if (!bitmap_contains(b, i, cnt, !value)) {
-	    next = i;
+		  printf("location of index : %d, size : %d\n", i, cnt);
+	      next = i;
 	      return i;
 	  }
 	}
@@ -338,11 +342,11 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 			  if (!bitmap_test(b, i)) {								// i번째가 비었으면
 				  tempIndex = i;									// tempIndex를 i로 설정
 
-				  for (j = tempIndex; j <= last; j++) {				// tempIndex부터 전체를 돌면서
+				  for (j = tempIndex + 1; j <= last; j++) {			// tempIndex + 1부터 전체를 돌면서
 					  if (bitmap_test(b, j))						// j번째가 비어있지 않으면
 						  break;									// j-1번째까지 비어있음
 				  }
-				  tempSize = j - 1 - tempIndex;						// 비어있는 가장 큰 size 반환
+				  tempSize = j - tempIndex;							// 비어있는 가장 큰 size 반환
 				  // tempSize = bitmap_count(b, tempIndex, j - tempIndex, value);		//  value == false 여야함
 
 				  if (tempSize >= cnt) {							// 원하는 크기보다 빈 공간의 크기가 크면
