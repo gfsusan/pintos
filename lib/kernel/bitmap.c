@@ -302,9 +302,23 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
     {
       size_t last = b->bit_cnt - cnt;
       size_t i;
-      for (i = start; i <= last; i++)
-        if (!bitmap_contains (b, i, cnt, !value))
-          return i; 
+
+	  if (pallocator == 0) {		// First Fit
+		  for (i = start; i <= last; i++)
+			  if (!bitmap_contains(b, i, cnt, !value))
+				  return i;
+	  }
+	  else if (pallocator == 1) {	// Next Fit
+
+	  }
+	  else if (pallocator == 2) {	// Best Fit
+
+	  }
+	  else if (pallocator == 3) {	// Buddy System
+
+	  }
+
+
     }
   return BITMAP_ERROR;
 }

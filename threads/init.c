@@ -257,7 +257,7 @@ static char **parse_options (char **argv)
 		else if (!strcmp (name, "-rs"))
 			random_init (atoi (value));
 		else if (!strcmp (name, "-ma"))
-			pallocator = (enum palloc_allocator) atoi (value);
+			pallocator = (enum palloc_allocator) atoi (value);	// TODO Parameter
 #ifdef USERPROG
 		else if (!strcmp (name, "-ul"))
 			user_page_limit = atoi (value);
