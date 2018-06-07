@@ -340,20 +340,20 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 			size_t tempSize;
 			size_t tempIndex;
 
-			for (i = start; i <= last; i++) {  // Iterate bitmap from start to last
-				if (!bitmap_test(b, i)) {	   // If ith bit is empty
+			for (i = start; i <= last; i++) {													// Iterate bitmap from start to last
+				if (!bitmap_test(b, i)) {																// If ith bit is empty
 					tempIndex = i;
 
-					for (j = tempIndex + 1; j <= b->bit_cnt - 1; j++) {	// Iterate bitmap from tempIndex + 1 to bit_cnt  -1
-						if (bitmap_test(b, j))	// If jth bit is not empty
-							break;			// From tempIndex to j-1 is empty
+					for (j = tempIndex + 1; j <= b->bit_cnt - 1; j++) {		// Iterate bitmap from tempIndex + 1 to bit_cnt  -1
+						if (bitmap_test(b, j))															// If jth bit is not empty
+							break;																						// From tempIndex to j-1 is empty
 					}
-					tempSize = j - tempIndex;	// Get largest empty size
+					tempSize = j - tempIndex;															// Get largest empty size
 					// tempSize = bitmap_count(b, tempIndex, j - 1 - tempIndex, value);
 
 					if (tempSize >= cnt) {
 						if (bestSize == 0 || bestSize > tempSize) {
-							bestSize = tempSize;	// Set best as temp
+							bestSize = cnt;															// Set best as temp
 							bestIndex = tempIndex;
 						}
 					}
@@ -365,6 +365,8 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 			}
 		}
 		else if (pallocator == 3) {	// Buddy System
+			if (cnt >= maxSize)
+				return BITMAP_ERROR;
 
 		}
 	}
