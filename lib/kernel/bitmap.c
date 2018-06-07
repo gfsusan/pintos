@@ -338,26 +338,26 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 		  size_t tempSize;
 		  size_t tempIndex;
 
-		  for (i = start; i <= last; i++) {							// bitmap의 전체 크기를 돌면서
-			  if (!bitmap_test(b, i)) {								// i번째가 비었으면
-				  tempIndex = i;									// tempIndex를 i로 설정
+		  for (i = start; i <= last; i++) {								// bitmap의 전체 크기를 돌면서
+			  if (!bitmap_test(b, i)) {									// i번째가 비었으면
+				  tempIndex = i;										// tempIndex를 i로 설정
 
-				  for (j = tempIndex + 1; j <= last; j++) {			// tempIndex + 1부터 전체를 돌면서
-					  if (bitmap_test(b, j))						// j번째가 비어있지 않으면
-						  break;									// j-1번째까지 비어있음
+				  for (j = tempIndex + 1; j <= b->bit_cnt - 1; j++) {	// tempIndex + 1부터 전체를 돌면서, 범위 설정..?!?!?
+					  if (bitmap_test(b, j))							// j번째가 비어있지 않으면
+						  break;										// j-1번째까지 비어있음
 				  }
-				  tempSize = j - tempIndex;							// 비어있는 가장 큰 size 반환
+				  tempSize = j - tempIndex;								// 비어있는 가장 큰 size 반환
 				  // tempSize = bitmap_count(b, tempIndex, j - tempIndex, value);		//  value == false 여야함
 
-				  if (tempSize >= cnt) {							// 원하는 크기보다 빈 공간의 크기가 크면
-					  if (bestSize == 0 || bestSize > tempSize) {	// bestSize가 0 또는 tempSize보다 크면
-						  bestSize = tempSize;						// temp를 best로 저장
+				  if (tempSize >= cnt) {								// 원하는 크기보다 빈 공간의 크기가 크면
+					  if (bestSize == 0 || bestSize > tempSize) {		// bestSize가 0 또는 tempSize보다 크면
+						  bestSize = tempSize;							// temp를 best로 저장
 						  bestIndex = tempIndex;
 					  }
 				  }
 			  }
 		  }
-		  if (bestSize != 0) {									// 공간이 존재하면
+		  if (bestSize != 0) {											// 공간이 존재하면
 			  printf("location of best index : %d, size : %d\n", bestIndex, bestSize);
 			  return bestIndex;
 		  }
