@@ -305,69 +305,70 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
   // value should be always false
   ASSERT(value == false);
 
-  if (cnt <= b->bit_cnt) 
-    {
-      size_t last = b->bit_cnt - cnt;
-      size_t i, j;
+	if (cnt <= b->bit_cnt)
+	{
+		size_t last = b->bit_cnt - cnt;
+		size_t i, j;
 
-      if (pallocator == 0) {		// First Fit
-        for (i = start; i <= last; i++)
-			if (!bitmap_contains(b, i, cnt, !value)) {
-				printf("location of index : %d, size : %d\n", i, cnt);
-				return i;
+		if (pallocator == 0) {		// First Fit
+			for (i = start; i <= last; i++) {
+				if (!bitmap_contains(b, i, cnt, !value)) {
+					printf("location of index : %d, size : %d\n", i, cnt);
+					return i;
+				}
 			}
-      }
-      else if (pallocator == 1) {	// Next Fit
-        for (i = next; i <= last; i++) {
-	  if (!bitmap_contains(b, i, cnt, !value)) {
-	    next = i;
-		printf("location of index : %d, size : %d\n", i, cnt);
-	    return i;
-	  }
-	}
-	for (i = start; i < next; i++) {
-	  if (!bitmap_contains(b, i, cnt, !value)) {
-		  printf("location of index : %d, size : %d\n", i, cnt);
-	      next = i;
-	      return i;
-	  }
-	}
-      }
-      else if (pallocator == 2) {	// Best Fit
-        size_t bestSize = 0;
-        size_t bestIndex;
-        size_t tempSize;
-        size_t tempIndex;
+		}
+		else if (pallocator == 1) {	// Next Fit
+			for (i = next; i <= last; i++) {
+				if (!bitmap_contains(b, i, cnt, !value)) {
+					next = i;
+					printf("location of index : %d, size : %d\n", i, cnt);
+					return i;
+				}
+			}
+			for (i = start; i < next; i++) {
+				if (!bitmap_contains(b, i, cnt, !value)) {
+					printf("location of index : %d, size : %d\n", i, cnt);
+					next = i;
+					return i;
+				}
+			}
+		}
+		else if (pallocator == 2) {	// Best Fit
+			size_t bestSize = 0;
+			size_t bestIndex;
+			size_t tempSize;
+			size_t tempIndex;
 
-        for (i = start; i <= last; i++) {  // Iterate bitmap from start to last
-	  if (!bitmap_test(b, i)) {	   // If ith bit is empty
-            tempIndex = i;
+			for (i = start; i <= last; i++) {  // Iterate bitmap from start to last
+				if (!bitmap_test(b, i)) {	   // If ith bit is empty
+					tempIndex = i;
 
-	    for (j = tempIndex + 1; j <= b->bit_cnt - 1; j++) {	// Iterate bitmap from tempIndex + 1 to bit_cnt  -1
-              if (bitmap_test(b, j))	// If jth bit is not empty
-                break;			// From tempIndex to j-1 is empty
-            }
-            tempSize = j - tempIndex;	// Get largest empty size
-            // tempSize = bitmap_count(b, tempIndex, j - 1 - tempIndex, value);
+					for (j = tempIndex + 1; j <= b->bit_cnt - 1; j++) {	// Iterate bitmap from tempIndex + 1 to bit_cnt  -1
+						if (bitmap_test(b, j))	// If jth bit is not empty
+							break;			// From tempIndex to j-1 is empty
+					}
+					tempSize = j - tempIndex;	// Get largest empty size
+					// tempSize = bitmap_count(b, tempIndex, j - 1 - tempIndex, value);
 
-	    if (tempSize >= cnt) {								
-              if (bestSize == 0 || bestSize > tempSize) {		
-                bestSize = tempSize;	// Set best as temp
-                bestIndex = tempIndex;
-	      }
-	    }
-	  }
+					if (tempSize >= cnt) {
+						if (bestSize == 0 || bestSize > tempSize) {
+							bestSize = tempSize;	// Set best as temp
+							bestIndex = tempIndex;
+						}
+					}
+				}
+			}
+			if (bestSize != 0) {		// If there is appropriate empty space
+				printf("location of best index : %d, size : %d\n", bestIndex, bestSize);
+				return bestIndex;
+			}
+		}
+		else if (pallocator == 3) {	// Buddy System
+
+		}
 	}
-	if (bestSize != 0) {		// If there is appropriate empty space
-          printf("location of best index : %d, size : %d\n", bestIndex, bestSize);
-	  return bestIndex;
-	}
-      }
-      else if (pallocator == 3) {	// Buddy System
-		  
-      }
-    }
-  return BITMAP_ERROR;
+	return BITMAP_ERROR;
 }
 
 /* Finds the first group of CNT consecutive bits in B at or after
