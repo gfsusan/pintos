@@ -4,6 +4,7 @@
 #include <round.h>
 #include <stdio.h>
 #include "threads/malloc.h"
+#include "threads/palloc.h"
 #ifdef FILESYS
 #include "filesys/file.h"
 #endif
@@ -17,6 +18,9 @@
    then bit 1 in the element represents bit K+1 in the bitmap,
    and so on. */
 typedef unsigned long elem_type;
+
+/* Store the last scanned index for Next-fit */
+size_t next = 0;
 
 /* Number of bits in an element. */
 #define ELEM_BITS (sizeof (elem_type) * CHAR_BIT)
@@ -303,20 +307,29 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
       size_t last = b->bit_cnt - cnt;
       size_t i;
 
-	  if (pallocator == 0) {		// First Fit
-		  for (i = start; i <= last; i++)
-			  if (!bitmap_contains(b, i, cnt, !value))
-				  return i;
+      if (pallocator == 0) {		// First Fit
+        for (i = start; i <= last; i++)
+          if (!bitmap_contains(b, i, cnt, !value))
+            return i;
+      }
+      else if (pallocator == 1) {	// Next Fit
+        for (i = next; i <= last; i++)
+	  if (!bitmap_contains(b, i, cnt, !value)) {
+            next = i;
+            return i;
 	  }
-	  else if (pallocator == 1) {	// Next Fit
+	for (i = start; i < next; i++)
+          if (!bitmap_contains(b, i, cnt, !value)) {
+            next = i;
+            return i;
+	  }
+      }
+      else if (pallocator == 2) {	// Best Fit
 
-	  }
-	  else if (pallocator == 2) {	// Best Fit
+      }
+      else if (pallocator == 3) {	// Buddy System
 
-	  }
-	  else if (pallocator == 3) {	// Buddy System
-
-	  }
+      }
 
 
     }
