@@ -380,9 +380,6 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 			size_t app_size = maxSize;
 			size_t index = start;
 
-      // just for test, if bit->cnt == maxSize, change maxSize to bit->cnt
-      printf("b->bit_cnt : %d\n", b->bit_cnt);
-
 			if (cnt >= maxSize)
 				return BITMAP_ERROR;
 
@@ -392,9 +389,6 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 					printf("size : %d, %d : %d\n", cnt, app_size / 2, app_size);
 					break;
 				}
-				else if (app_size == 1) {
-					break;
-				}
 				else {
 					app_size /= 2;
 				}
@@ -402,17 +396,17 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 
 			// find appropriate location
 			while (1) {
-        if (index + app_size > b->bit_cnt - 1) {
-          printf("Required size is not available, Wait\n");
-          return BITMAP_ERROR;
-        }
+				if (index >= b->bit_cnt) {
+					 printf("Required size is not available, Wait, %d\n", index + app_size);
+					 return BITMAP_ERROR;
+				 }
 				if (!bitmap_contains(b, index, app_size, !value)) {		// if there is no true from index to index + app_size
 					printf("location of index : %d, app_size : %d\n\n", index, app_size);
 					//buddy_block[index] = app_size;
 					break;
 				}
 				else {
-					index += app_size;
+					index += app_size;		// next index
 				}
 			}
 			return index;

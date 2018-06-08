@@ -141,15 +141,7 @@ palloc_free_multiple (void *pages, size_t page_cnt)
   memset (pages, 0xcc, PGSIZE * page_cnt);
 #endif
 
-  size_t i;
-  for (i = 0; i < page_cnt; i++) {
-	  if (bitmap_test(pool->used_map, page_idx + i)) {
-		  printf("%d : true\n", page_idx + i);
-	  }
-	  else
-		  printf("%d : false\n", page_cnt + i);
-  }
-	  ASSERT (bitmap_all (pool->used_map, page_idx, page_cnt));
+  ASSERT (bitmap_all (pool->used_map, page_idx, page_cnt));
   bitmap_set_multiple (pool->used_map, page_idx, page_cnt, false);
 }
 
