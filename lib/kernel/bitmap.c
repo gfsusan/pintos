@@ -319,14 +319,14 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 			}
 		}
 		else if (pallocator == 1) {	// Next Fit
-			for (i = next; i <= last; i++) {
-				if (!bitmap_contains(b, i, cnt, !value)) {
+			for (i = next; i <= last; i++) {								// Iterate bitmap from next to last
+				if (!bitmap_contains(b, i, cnt, !value)) {					// If i~i+cnt-1 is empty
 					next = i;
 					printf("location of index : %d, size : %d\n", i, cnt);
 					return i;
 				}
 			}
-			for (i = start; i < next; i++) {
+			for (i = start; i < next; i++) {								// Iterate bitmap from start to next
 				if (!bitmap_contains(b, i, cnt, !value)) {
 					printf("location of index : %d, size : %d\n", i, cnt);
 					next = i;
@@ -341,11 +341,11 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 			size_t tempIndex;
 
 			for (i = start; i <= last; i++) {								// Iterate bitmap from start to last
-				if (!bitmap_test(b, i)) {									// If ith bit is empty
+				if (!bitmap_test(b, i)) {									// If ith page is empty
 					tempIndex = i;
 
 					for (j = tempIndex + 1; j <= b->bit_cnt - 1; j++) {		// Iterate bitmap from tempIndex + 1 to bit_cnt  -1
-						if (bitmap_test(b, j))								// If jth bit is not empty
+						if (bitmap_test(b, j))								// If jth page is not empty
 							break;											// From tempIndex to j-1 is empty
 					}
 					tempSize = j - tempIndex;								// Get largest empty size
@@ -369,7 +369,7 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 			size_t app_size = b->bit_cnt;
 			size_t index = start;
 
-			// find appropriate bit (size of block)
+			// find appropriate size (size of page)
 			while (1) {
 				if (((app_size / 2) < cnt) && (cnt <= app_size)) {
 					printf("size : %d, %d : %d\n", cnt, app_size / 2, app_size);
