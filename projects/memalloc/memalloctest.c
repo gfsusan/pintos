@@ -9,53 +9,82 @@
 
 void run_memalloc_test(char **argv UNUSED)
 {
-	size_t i;
+	size_t k = 1024;
+	size_t i = 0;
 	char* dynamicmem[11];
-
-	// memset : 0 - 6
-	for (i=0; i<7; i++) {
-		dynamicmem[i] = (char *) malloc (145000);
-		if (dynamicmem[i] != NULL) {
-			memset(dynamicmem[i], 0x00, 145000);
-		}
-	}
-	printf("dump page status : \n");
-	palloc_get_status(0);
-	thread_sleep(100);
-
-	// free : 0 - 2
-	for (i = 0; i<3; i++) {
-		if (dynamicmem[i] != NULL) {
-			free(dynamicmem[i]);
-		}
-		printf("dump page status : \n");
+	
+	// memset : 0 - 3
+	dynamicmem[0] = (char *) malloc (50 * k);
+	if (dynamicmem[0] != NULL) {
+		memset(dynamicmem[0], 0x00, (50 * k));
+		printf("dump page status: \n");
 		palloc_get_status(0);
 	}
 
-	// memset : 7 - 9
-	for (i = 7; i<10; i++) {
-		dynamicmem[i] = (char *)malloc(145000);
-		if (dynamicmem[i] != NULL) {
-			memset(dynamicmem[i], 0x00, 145000);
-			printf("dump page status : \n");
-			palloc_get_status(0);
-		}
-	}
-
-	//memset : 10
-	dynamicmem[10] = (char *)malloc(16000);
-	memset(dynamicmem[10], 0x00, 16000);
-	printf("dump page status : \n");
-	palloc_get_status(0);
-
-	thread_sleep(100);
-
-	// free
-	for (i = 3; i<11; i++) {
-		if (dynamicmem[i] != NULL) {
-			free(dynamicmem[i]);
-		}
-		printf("dump page status : \n");
+	dynamicmem[1] = (char *) malloc (120 * k);
+	if (dynamicmem[1] != NULL){
+		memset(dynamicmem[1], 0x00, (120 * k));
+		printf("dump page status: \n");
 		palloc_get_status(0);
 	}
+
+	dynamicmem[2] = (char *) malloc (32 * k);
+	if (dynamicmem[2] != NULL) {
+		memset(dynamicmem[2], 0x00, (32 * k));
+		printf("dump page status: \n");
+		palloc_get_status(0);
+	}
+
+	dynamicmem[3] = (char *) malloc (128 * k);
+	if (dynamicmem[3] != NULL) {
+		memset(dynamicmem[3], 0x00, (128 * k));
+		printf("dump page status: \n");
+		palloc_get_status(0);
+	}
+
+	// release : 1
+	if (dynamicmem[1] != NULL) {
+		free(dynamicmem[1]);
+		printf("dump page status: \n");
+		palloc_get_status(0);
+	}
+	
+	// release : 0
+	if (dynamicmem[0] != NULL) {
+		free(dynamicmem[0]);
+		printf("dump page status: \n");
+		palloc_get_status(0);
+	}
+
+	// memset : 4
+	dynamicmem[4] = (char *) malloc (37 * k);
+	if (dynamicmem[4] != NULL) {
+		memset(dynamicmem[4], 0x00, (37 * k));
+		printf("dump page status: \n");
+		palloc_get_status(0);
+	}
+
+	// release : 2
+	if (dynamicmem[2] != NULL) {
+		free(dynamicmem[2]);
+		printf("dump page status: \n");
+		palloc_get_status(0);
+	}
+
+	// release : 4
+	if (dynamicmem[4] != NULL) {
+		free(dynamicmem[4]);
+		printf("dump page status: \n");
+		palloc_get_status(0);
+
+	}
+
+	// release : 3
+	if (dynamicmem[3] != NULL) {
+		free(dynamicmem[3]);
+		printf("dump page status: \n");
+		palloc_get_status(0);
+	}
+
+	thread_sleep(100);
 }
