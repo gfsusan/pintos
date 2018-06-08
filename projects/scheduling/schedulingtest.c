@@ -72,6 +72,6 @@ void run_scheduling_test(char **argv UNUSED)
 
 	for (i=0; i<MAX_THREAD_CNT; i++) {
 		sema_down(&info[i].sema_join);
-		printf("Thread %d's priority is %d and received %d ticks.\n", i, priority[i], info[i].tick_count);
+		printf("Thread %d's initial priority was %d and received %d ticks.\n", i, priority[i], info[i].tick_count);
 	}
 }
