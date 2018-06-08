@@ -46,11 +46,11 @@ void run_scheduling_test(char **argv UNUSED)
 	int i;
 	struct thread_info info[MAX_THREAD_CNT];
 	int64_t start_time;
-	int priority;
+	int priority[MAX_THREAD_CNT];
 
 	random_init(0);	// added - seed
 	start_time = timer_ticks();
-	printf("11111222222\n");
+
 	for (i=0; i<MAX_THREAD_CNT; i++) {
 		struct thread_info *ti = &info[i];
 		char name[16];
@@ -60,11 +60,11 @@ void run_scheduling_test(char **argv UNUSED)
 		ti->tick_count = 0;
 		sema_init(&ti->sema_join, 0);
 
-		priority = ((int) random_ulong() & 0x00FF) % 5;		// set priority by random
+		priority[i]= ((int) random_ulong() & 0x00FF) % 5;		// set priority by random
 		
-		printf("%d's priority : %d\n", i, priority);
+		printf("%d's priority : %d\n", i, priority[i]);
 		snprintf(name, sizeof name, "load %d", i);
-		thread_create(name, priority, load_thread, ti);
+		thread_create(name, priority[i], load_thread, ti);
 	}
 
 	printf("Starting threads took %lld ticks.\n", timer_elapsed (start_time));
@@ -72,6 +72,6 @@ void run_scheduling_test(char **argv UNUSED)
 
 	for (i=0; i<MAX_THREAD_CNT; i++) {
 		sema_down(&info[i].sema_join);
-		printf("Thread %d received %d ticks.\n", i, info[i].tick_count);
+		printf("Thread %d's priority is %d and received %d ticks.\n", i, priority[i], info[i].tick_count);
 	}
 }

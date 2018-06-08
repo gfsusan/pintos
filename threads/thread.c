@@ -190,8 +190,8 @@ thread_tick(void)
 	}
 
 	/* Enforce preemption. */
-	// thread_ticks를 1 증가하고 정해진 TimeSlice를 받아와 크면 intr_yield_on_return()
-	if (++thread_ticks >= MAX_TIME_SLICE - current_priority) {	/* 현재 Thread의 Priority에 따라 Time Slice를 Return한다. */
+	// thread_ticks를 1 증가하고 정해진 TimeSlice를 계산해 크면 intr_yield_on_return()
+	if (++thread_ticks >= MAX_TIME_SLICE - current_priority) {	/* 현재 Thread의 Priority에 따른 Time Slice를 계산한다. */
 		//printf("thread_ticks = %d, time slice = %d\n", thread_tick, getTimeSlice(current_priority));
 		intr_yield_on_return();
 	}
@@ -206,7 +206,7 @@ struct list_elem * addAge(struct thread* cur_t) {
 	struct list *nextfq;
 
 	cur_t->age++;
-	printf("Thread %d's age : %d\n", cur_t->tid, cur_t->age);
+	printf("Thread %s's age : %d\n", cur_t->name, cur_t->age);
 	
 	if (cur_t->age >= 20) {
 		printf("Thread %d's priority has been changed to %d\n", cur_t->tid, cur_t->priority);
