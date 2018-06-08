@@ -112,8 +112,6 @@ void thread_init(void);
 void thread_start(void);
 
 void thread_tick(void);
-struct list_elem *addAge(struct thread *);   // added
-unsigned getTimeSlice(int);   // added
 void thread_print_stats(void);
 
 typedef void thread_func(void *aux);

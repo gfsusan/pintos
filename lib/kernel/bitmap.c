@@ -22,14 +22,6 @@ typedef unsigned long elem_type;
 /* Store the last scanned index for Next-fit */
 size_t next = 0;
 
-/* Maximum bit of bitmap */
-const size_t maxBit = 9;
-/* Maximum size of bitmap */
-const size_t maxSize = 512;
-/*
-size_t buddy_exist[512] = { 0 };
-size_t buddy_block[512] = { 0 };
-*/
 
 /* Number of bits in an element. */
 #define ELEM_BITS (sizeof (elem_type) * CHAR_BIT)
@@ -373,15 +365,9 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 			}
 		}
 		else if (pallocator == 3) {	// Buddy System
-			/*
-			size_t buddy_exist[512] = { 0 };
-			size_t buddy_block[512] = { 0 };	// buddy_block[index] = block_size
-			*/
-			size_t app_size = maxSize;
-			size_t index = start;
 
-			if (cnt >= maxSize)
-				return BITMAP_ERROR;
+			size_t app_size = b->bit_cnt;
+			size_t index = start;
 
 			// find appropriate bit (size of block)
 			while (1) {
@@ -389,24 +375,23 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 					printf("size : %d, %d : %d\n", cnt, app_size / 2, app_size);
 					break;
 				}
-				else {
+				else {	// if it's smaller divide by 2
 					app_size /= 2;
 				}
 			}
 
 			// find appropriate location
 			while (1) {
-				if (index >= b->bit_cnt) {
+				if (index >= b->bit_cnt) {		// if memory is full
 					 printf("Required size is not available, Wait, %d\n", index + app_size);
 					 return BITMAP_ERROR;
 				 }
 				if (!bitmap_contains(b, index, app_size, !value)) {		// if there is no true from index to index + app_size
 					printf("location of index : %d, app_size : %d\n\n", index, app_size);
-					//buddy_block[index] = app_size;
 					break;
 				}
-				else {
-					index += app_size;		// next index
+				else {							// if there is true - can't allocate in that bound
+					index += app_size;			// next index
 				}
 			}
 			return index;

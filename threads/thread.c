@@ -62,6 +62,7 @@ static long long user_ticks;    /* # of timer ticks in user programs. */
 
 								/* Scheduling. */
 #define TIME_SLICE 4            /* # of timer ticks to give each thread. */
+#define MAX_TIME_SLICE 6		/* Max # of timer ticks to give thread. */
 static unsigned thread_ticks;   /* # of timer ticks since last yield. */
 
 static void kernel_thread(thread_func *, void *aux);
@@ -75,6 +76,7 @@ static void *alloc_frame(struct thread *, size_t size);
 static void schedule(void);
 void thread_schedule_tail(struct thread *prev);
 static tid_t allocate_tid(void);
+struct list_elem *addAge(struct thread *);   // added
 
 
 /* added by jy for MFQ
@@ -189,7 +191,7 @@ thread_tick(void)
 
 	/* Enforce preemption. */
 	// thread_ticks를 1 증가하고 정해진 TimeSlice를 받아와 크면 intr_yield_on_return()
-	if (++thread_ticks >= getTimeSlice(current_priority)) {
+	if (++thread_ticks >= MAX_TIME_SLICE - current_priority) {	/* 현재 Thread의 Priority에 따라 Time Slice를 Return한다. */
 		//printf("thread_ticks = %d, time slice = %d\n", thread_tick, getTimeSlice(current_priority));
 		intr_yield_on_return();
 	}
@@ -222,16 +224,6 @@ struct list_elem * addAge(struct thread* cur_t) {
 
 }
 
-/* 현재 Thread의 Priority에 따라 Time Slice를 Return한다. */
-unsigned getTimeSlice(int priority) {
-	switch (priority) {
-	case 0: return 6;
-	case 1: return 5;
-	case 2: return 4;
-	case 3: return 3;
-	case 4: return 2;
-	}
-}
 
 /* Prints thread statistics. */
 void
