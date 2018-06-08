@@ -21,7 +21,15 @@ typedef unsigned long elem_type;
 
 /* Store the last scanned index for Next-fit */
 size_t next = 0;
-const size_t maxSize = 1 << 9;
+
+/* Maximum bit of bitmap */
+const size_t maxBit = 9;
+/* Maximum size of bitmap */
+const size_t maxSize = 512;
+
+size_t buddy_exist[512] = { 0 };
+size_t buddy_block[512] = { 0 };
+
 
 /* Number of bits in an element. */
 #define ELEM_BITS (sizeof (elem_type) * CHAR_BIT)
@@ -340,34 +348,68 @@ bitmap_scan (const struct bitmap *b, size_t start, size_t cnt, bool value)
 			size_t tempSize;
 			size_t tempIndex;
 
-			for (i = start; i <= last; i++) {													// Iterate bitmap from start to last
-				if (!bitmap_test(b, i)) {																// If ith bit is empty
+			for (i = start; i <= last; i++) {								// Iterate bitmap from start to last
+				if (!bitmap_test(b, i)) {									// If ith bit is empty
 					tempIndex = i;
 
 					for (j = tempIndex + 1; j <= b->bit_cnt - 1; j++) {		// Iterate bitmap from tempIndex + 1 to bit_cnt  -1
-						if (bitmap_test(b, j))															// If jth bit is not empty
-							break;																						// From tempIndex to j-1 is empty
+						if (bitmap_test(b, j))								// If jth bit is not empty
+							break;											// From tempIndex to j-1 is empty
 					}
-					tempSize = j - tempIndex;															// Get largest empty size
+					tempSize = j - tempIndex;								// Get largest empty size
 					// tempSize = bitmap_count(b, tempIndex, j - 1 - tempIndex, value);
 
 					if (tempSize >= cnt) {
 						if (bestSize == 0 || bestSize > tempSize) {
-							bestSize = cnt;															// Set best as temp
+							bestSize = cnt;									// Set best as temp
 							bestIndex = tempIndex;
 						}
 					}
 				}
 			}
-			if (bestSize != 0) {		// If there is appropriate empty space
+			if (bestSize != 0) {											// If there is appropriate empty space
 				printf("location of best index : %d, size : %d\n", bestIndex, bestSize);
 				return bestIndex;
 			}
 		}
 		else if (pallocator == 3) {	// Buddy System
+			/*
+			size_t buddy_exist[512] = { 0 };
+			size_t buddy_block[512] = { 0 };	// buddy_block[index] = block_size
+			*/
+			size_t ap_bit = maxBit;
+			size_t index = start;
+
 			if (cnt >= maxSize)
 				return BITMAP_ERROR;
 
+			// find appropriate bit (size of block)
+			while (1) {
+				if (((1 << (ap_bit - 1)) < cnt) && (cnt <= (1 << ap_bit))) {
+					printf("size : %d, %d : %d\n", cnt, 1 << (ap_bit - 1), 1 << ap_bit);
+					break;
+				}
+				else if (ap_bit == 0) {
+					ap_bit++;
+					break;
+				}
+				else {
+					ap_bit--;
+				}
+			}
+			
+			// find appropriate location
+			while (1) {
+				if (!bitmap_contains(b, index, 1<< ap_bit, !value)) {		// if there is no true from index to index + ap_bit
+					printf("location of index : %d, app_bit : %d\n\n", index, ap_bit);
+					//buddy_block[index] = ap_bit;
+					break;
+				}
+				else {
+					index += ap_bit;
+				}
+			}
+			return index;
 		}
 	}
 	return BITMAP_ERROR;
