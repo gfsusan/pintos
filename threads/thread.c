@@ -210,7 +210,8 @@ struct list_elem * addAge(struct thread* cur_t) {
 	if (cur_t->age >= 20) {
 		cur_t->priority++;
 		cur_t->age = 0;
-		printf("Thread %s's priority has been changed  from %d to %d\n", cur_t->name, cur_t->priority - 1, cur_t->priority);
+		printf("Thread %s's age has reached 20.\n", cur_t->name);
+		printf("Thread %s's priority has been changed  from %d to %d.\n", cur_t->name, cur_t->priority - 1, cur_t->priority);
 
 		// 기존 readyqueue에서 지우고 readyqueue 하나 올리기
 		nextfq = thread_get_fq(cur_t->priority);		// 증가된 priority의 fq 반환
